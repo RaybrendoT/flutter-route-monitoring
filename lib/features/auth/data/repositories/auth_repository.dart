@@ -4,6 +4,9 @@ import '../datasources/auth_remote_data_source.dart';
 abstract class AuthRepository {
   Future<User?> login(String email, String password);
   Future<User?> register(String name, String email, String password);
+  Future<String?> requestPasswordReset(Map<String, dynamic> identifier);
+  Future<bool> verifyPasswordReset(Map<String, dynamic> identifier, String code);
+  Future<bool> resetPassword(Map<String, dynamic> identifier, String code, String newPassword);
   Future<bool> verifyToken(String token);
   Future<bool> refreshToken();
   Future<bool> changePassword(String currentPassword, String newPassword);
@@ -24,6 +27,21 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User?> register(String name, String email, String password) async {
     return await remoteDataSource.register(name, email, password);
+  }
+
+  @override
+  Future<String?> requestPasswordReset(Map<String, dynamic> identifier) async {
+    return await remoteDataSource.requestPasswordReset(identifier);
+  }
+
+  @override
+  Future<bool> verifyPasswordReset(Map<String, dynamic> identifier, String code) async {
+    return await remoteDataSource.verifyPasswordReset(identifier, code);
+  }
+
+  @override
+  Future<bool> resetPassword(Map<String, dynamic> identifier, String code, String newPassword) async {
+    return await remoteDataSource.resetPassword(identifier, code, newPassword);
   }
 
   @override

@@ -56,6 +56,102 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<String?> requestPasswordReset({
+    String? email,
+    String? phone,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final identifier = <String, dynamic>{};
+    if (email != null && email.isNotEmpty) {
+      identifier['email'] = email;
+    } else if (phone != null && phone.isNotEmpty) {
+      identifier['phone'] = phone;
+    } else {
+      _errorMessage = 'Informe um identificador válido';
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    }
+
+    try {
+      return await authRepository.requestPasswordReset(identifier);
+    } catch (e) {
+      _errorMessage = 'Erro ao solicitar recuperação de senha';
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> verifyPasswordReset({
+    String? email,
+    String? phone,
+    required String code,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final identifier = <String, dynamic>{};
+    if (email != null && email.isNotEmpty) {
+      identifier['email'] = email;
+    } else if (phone != null && phone.isNotEmpty) {
+      identifier['phone'] = phone;
+    } else {
+      _errorMessage = 'Informe um identificador válido';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      return await authRepository.verifyPasswordReset(identifier, code);
+    } catch (e) {
+      _errorMessage = 'Código inválido ou expirado';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> resetPassword({
+    String? email,
+    String? phone,
+    required String code,
+    required String newPassword,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final identifier = <String, dynamic>{};
+    if (email != null && email.isNotEmpty) {
+      identifier['email'] = email;
+    } else if (phone != null && phone.isNotEmpty) {
+      identifier['phone'] = phone;
+    } else {
+      _errorMessage = 'Informe um identificador válido';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      return await authRepository.resetPassword(identifier, code, newPassword);
+    } catch (e) {
+      _errorMessage = 'Falha ao redefinir a senha';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void logout() {
     _currentUser = null;
     notifyListeners();
