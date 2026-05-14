@@ -17,8 +17,8 @@ class SplashView extends StatelessWidget {
               children: [
                 // Ícone
                 Container(
-                  width: 90,
-                  height: 90,
+                  width: 95,
+                  height: 95,
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E90FF),
                     borderRadius: BorderRadius.circular(24),
@@ -26,19 +26,33 @@ class SplashView extends StatelessWidget {
                   child: const Icon(
                     Icons.location_on_outlined,
                     color: Colors.white,
-                    size: 40,
+                    size: 60,
                   ),
                 ),
 
                 const SizedBox(height: 25),
 
                 // Título
-                const Text(
-                  'Rota Certa',
-                  style: TextStyle(
-                    color: Color(0xFF1E90FF),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Rota',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'certa',
+                        style: TextStyle(
+                          color: Color(0xFF1E90FF),
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 

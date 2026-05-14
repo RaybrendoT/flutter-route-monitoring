@@ -524,7 +524,7 @@ class VerifyCodeStep extends StatelessWidget {
   }
 }
 
-class CreatePasswordStep extends StatelessWidget {
+class CreatePasswordStep extends StatefulWidget {
   final TextEditingController newPasswordController;
   final TextEditingController confirmPasswordController;
   final VoidCallback onSubmit;
@@ -541,6 +541,57 @@ class CreatePasswordStep extends StatelessWidget {
     required this.isLoading,
     required this.errorMessage,
   });
+
+  @override
+  State<CreatePasswordStep> createState() => _CreatePasswordStepState();
+}
+
+class _CreatePasswordStepState extends State<CreatePasswordStep> {
+  String _passwordStrengthText = 'Fraca';
+  Color _passwordStrengthColor = Colors.redAccent;
+  double _passwordStrength = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.newPasswordController.addListener(_updatePasswordStrength);
+  }
+
+  @override
+  void dispose() {
+    widget.newPasswordController.removeListener(_updatePasswordStrength);
+    super.dispose();
+  }
+
+  void _updatePasswordStrength() {
+    final password = widget.newPasswordController.text;
+    int strength = 0;
+
+    if (password.length >= 8) strength++;
+    if (RegExp(r'[A-Z]').hasMatch(password)) strength++;
+    if (RegExp(r'[a-z]').hasMatch(password)) strength++;
+    if (RegExp(r'[0-9]').hasMatch(password)) strength++;
+    if (RegExp(r'''[!@#\$&*~\^()\[\]{}\-_+=|\\:;"'<>,.?/]''')
+        .hasMatch(password)) strength++;
+
+    setState(() {
+      _passwordStrength = strength / 5;
+
+      if (strength <= 2) {
+        _passwordStrengthText = 'Fraca';
+        _passwordStrengthColor = Colors.redAccent;
+      } else if (strength == 3) {
+        _passwordStrengthText = 'Média';
+        _passwordStrengthColor = Colors.amber;
+      } else if (strength == 4) {
+        _passwordStrengthText = 'Boa';
+        _passwordStrengthColor = Colors.lightGreen;
+      } else {
+        _passwordStrengthText = 'Forte';
+        _passwordStrengthColor = Colors.green;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -567,74 +618,75 @@ class CreatePasswordStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
-              customInput(
-                controller: newPasswordController,
+
+              // Nova senha
+              CustomInput(
+                controller: widget.newPasswordController,
                 hint: 'Nova senha',
                 icon: Icons.lock_outline,
                 obscure: true,
               ),
               const SizedBox(height: 18),
-              customInput(
-                controller: confirmPasswordController,
+
+              // Confirmar senha
+              CustomInput(
+                controller: widget.confirmPasswordController,
                 hint: 'Confirmar senha',
                 icon: Icons.lock_outline,
                 obscure: true,
               ),
               const SizedBox(height: 25),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(10),
+
+              // Indicador de força da senha (só aparece ao digitar)
+              if (widget.newPasswordController.text.isNotEmpty) ...[
+                const SizedBox(height: 25),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: (_passwordStrength * 3).toInt().clamp(1, 3),
+                      child: Container(
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: _passwordStrengthColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Força da senha: Média',
-                  style: TextStyle(
-                    color: Colors.white54,
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Força da senha: $_passwordStrengthText',
+                    style: const TextStyle(color: Colors.white54),
                   ),
                 ),
-              ),
+              ],
+
               const SizedBox(height: 35),
+
               primaryButton(
-                text: isLoading ? 'Salvando...' : 'Salvar senha',
-                onPressed: isLoading ? null : onSubmit,
+                text: widget.isLoading ? 'Salvando...' : 'Salvar senha',
+                onPressed: widget.isLoading ? null : widget.onSubmit,
               ),
               const SizedBox(height: 20),
-              if (errorMessage != null)
+
+              if (widget.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
-                    errorMessage!,
+                    widget.errorMessage!,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.redAccent,
@@ -642,13 +694,12 @@ class CreatePasswordStep extends StatelessWidget {
                     ),
                   ),
                 ),
+
               TextButton(
-                onPressed: onBack,
+                onPressed: widget.onBack,
                 child: const Text(
                   'Voltar',
-                  style: TextStyle(
-                    color: Colors.white54,
-                  ),
+                  style: TextStyle(color: Colors.white54),
                 ),
               ),
             ],
@@ -658,7 +709,75 @@ class CreatePasswordStep extends StatelessWidget {
     );
   }
 }
+class CustomInput extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final bool obscure;
+  final TextInputType keyboardType;
 
+  const CustomInput({
+    super.key,
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.obscure = false,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  State<CustomInput> createState() => _CustomInputState();
+}
+
+class _CustomInputState extends State<CustomInput> {
+  bool _obscureText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscure;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.controller,
+      keyboardType: widget.keyboardType,
+      obscureText: _obscureText,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: widget.hint,
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: Icon(widget.icon, color: Colors.white38),
+        suffixIcon: widget.obscure
+            ? IconButton(
+          icon: Icon(
+            _obscureText
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: Colors.white38,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
+        )
+            : null,
+        filled: true,
+        fillColor: const Color(0xFF13294B),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
 class SuccessStep extends StatelessWidget {
   final VoidCallback onFinish;
 

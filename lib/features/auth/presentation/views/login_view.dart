@@ -15,6 +15,8 @@ class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
+
 
   @override
   void dispose() {
@@ -66,12 +68,26 @@ class _LoginViewState extends State<LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // LOGO / TÍTULO
-                  const Text(
-                    'Rotacerta',
-                    style: TextStyle(
-                      color: Color(0xFF1E90FF),
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Rota',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'certa',
+                          style: TextStyle(
+                            color: Color(0xFF1E90FF),
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -112,25 +128,32 @@ class _LoginViewState extends State<LoginView> {
 
                   const SizedBox(height: 18),
 
-                  // SENHA
+// SENHA
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Senha',
-                      hintStyle: const TextStyle(
-                        color: Colors.white54,
-                      ),
+                      hintStyle: const TextStyle(color: Colors.white54),
                       filled: true,
                       fillColor: const Color(0xFF13294B),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 18,
                       ),
-                      suffixIcon: const Icon(
-                        Icons.remove_red_eye_outlined,
-                        color: Colors.white38,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white38,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -138,6 +161,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                   ),
+
 
                   const SizedBox(height: 28),
 
